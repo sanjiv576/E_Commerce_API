@@ -14,4 +14,13 @@ router.route('/register')
     .put((req, res, next) => res.status(405).json({ error: "PUT method is not allowed" }))
     .post(userController.userRegister);
 
+
+
+// for logging an account
+router.route('/login')
+    .get((req, res, next) => res.status(405).json({ error: "GET method is not allowed" }))
+    .delete((req, res, next) => res.status(405).json({ error: "DELETE method is not allowed" }))
+    .put((req, res, next) => res.status(405).json({ error: "PUT method is not allowed" }))
+    .post(userController.userLogin);
+
 module.exports = router;
