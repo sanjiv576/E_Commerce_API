@@ -27,8 +27,8 @@ const localDbUri = `mongodb://127.0.0.1:27017/${dbName}`;  // uri for storing da
 // for storing data locally
 function connectDbLocally(){
     mongoose.connect(localDbUri)
-    .then(console.log(`Database is connected as ${dbName} locally.`))
-    .catch((err) => console.log(`Failed to connect database. Error message: ${err}`));
+        .then(console.log(`Database is connected as ${dbName} locally.`))
+        .catch((err) => console.log(`Failed to connect database. Error message: ${err}`));
 }
 
 // connectDbLocally();
@@ -42,11 +42,25 @@ mongoose.connect(globalDbUri)
 // testing 
 app.get('/', (req, res) => {
     res.send('<h1>Testing</h1>');
-} );
+});
 
 
 // routes for users
-app.use('/users',user_routes);
+app.use('/users', user_routes);
+
+// error handling middlewares
+app.use((req, res, next, err) => {
+
+    if (err.name === 'ValidationError') return res.status(400);
+    else if (err.name === 'CastError') return res.status(400);
+    else {
+        res.json({ error: err.message });
+    }
+});
+
+// for unknown path
+app.use((req, res) => res.status(404).json({ error: 'Path not found' }));
+
 
 
 module.exports = app;
