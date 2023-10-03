@@ -5,9 +5,11 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
+const user_routes = require('./routes/user_routes');
+
 const app = express();
 // middleware to access files
-app.use(express.static('public'));
+app.use(express.static('public/'));
 
 // middleware to decode data that come from browser and store in req.body
 app.use(express.json());
@@ -29,12 +31,22 @@ function connectDbLocally(){
     .catch((err) => console.log(`Failed to connect database. Error message: ${err}`));
 }
 
+// connectDbLocally();
+
 
 // mongodb globally connection
 mongoose.connect(globalDbUri)
     .then(() => console.log(`Database is connected successfully globally to ${globalDbUri}.`))
     .catch((err) => console.log(`Failied to connect database. Error message : ${err.message}`));
 
+// testing 
+app.get('/', (req, res) => {
+    res.send('<h1>Testing</h1>');
+} );
+
+
+// routes for users
+app.use('/users',user_routes);
 
 
 module.exports = app;
