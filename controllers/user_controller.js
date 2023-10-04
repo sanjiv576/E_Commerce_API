@@ -63,6 +63,7 @@ const userLogin = ('/login', (req, res, next) => {
                     const payload = {
                         id: user.id,
                         email: user.email,
+                        role: user.role,
                         fullName: user.fullName,
                         picture: user.picture,
                     };
