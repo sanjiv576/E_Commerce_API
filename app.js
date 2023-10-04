@@ -6,6 +6,9 @@ const cors = require('cors');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 const user_routes = require('./routes/user_routes');
+const admin_routes = require('./routes/admin_routes');
+
+const {verifyAdmin, verifyUser} = require('./middlewares/auth');
 
 const app = express();
 // middleware to access files
@@ -47,6 +50,9 @@ app.get('/', (req, res) => {
 
 // routes for users
 app.use('/users', user_routes);
+
+// routes for admin
+app.use('/admin', verifyUser, admin_routes);
 
 // error handling middlewares
 app.use((req, res, next, err) => {
