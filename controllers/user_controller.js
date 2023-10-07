@@ -1,6 +1,7 @@
 const { User } = require("../models/User");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Product = require("../models/Product");
 
 
 const userRegister = (req, res, next) => {
@@ -98,7 +99,32 @@ const userLogin = ('/login', (req, res, next) => {
 });
 
 
+// get all products by all admin + registered users + guests
+const getAllProducts = (req, res, next) => {
+    Product.find()
+        .then(products => {
+            if (!products) return res.status(200).json({ error: 'No Products Available.' });
+            res.status(200).json(products);
+        })
+        .catch((err => res.status(400).json({ error: err.message })));
+
+}
+
+
+// get a single product by  all admin + registered users + guests
+const getSingleProduct = (req, res, next) => {
+    const productId = req.params.product_id;
+    Product.findById(productId)
+        .then(foundProduct => {
+            if(!foundProduct) return res.status(400).json({error: 'No product found with this id.'});
+            res.status(200).json(foundProduct);
+        })
+        .catch((err => res.status(400).json({ error: err.message })));
+
+};
 module.exports = {
     userRegister,
     userLogin,
+    getAllProducts,
+    getSingleProduct,
 }
