@@ -31,6 +31,11 @@ const userSchema = new mongoose.Schema({
         default: 'defaultImage.jpg'
 
     },
+    passwordLastChanged: {
+        type: Date,
+        default: Date.now,
+    },
+    
 
 }, { timestamps: true });
 
@@ -44,6 +49,21 @@ userSchema.set('toJSON', {
     }
 });
 
+
+// method for returning bool to check whether password is need to be changed in every 90 days or not
+const isPasswordChangeRequired = function (lastPasswordChangedDate) {
+    const expirationDays = 90; // Change password every 90 days
+    const lastChanged = lastPasswordChangedDate;
+    console.log(`Last password changed date: ${lastChanged}`)
+    const today = new Date();
+    const expirationDate = new Date(lastChanged);
+    expirationDate.setDate(expirationDate.getDate() + expirationDays);
+    return today > expirationDate;
+};
+
+
+
+
 const User = new mongoose.model('User', userSchema);
 
-module.exports = { User, userSchema };
+module.exports = { User, userSchema, isPasswordChangeRequired };
