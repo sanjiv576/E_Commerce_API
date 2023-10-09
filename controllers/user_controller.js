@@ -1,7 +1,6 @@
 const { User, isPasswordChangeRequired } = require("../models/User");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const Product = require("../models/Product");
 
 
 const userRegister = (req, res, next) => {
@@ -99,30 +98,6 @@ const userLogin = ('/login', (req, res, next) => {
 });
 
 
-// get all products by all admin + registered users + guests
-const getAllProducts = (req, res, next) => {
-    Product.find()
-        .then(products => {
-            if (!products) return res.status(200).json({ error: 'No Products Available.' });
-            res.status(200).json(products);
-        })
-        .catch((err => res.status(400).json({ error: err.message })));
-
-}
-
-
-// get a single product by  all admin + registered users + guests
-const getSingleProduct = (req, res, next) => {
-    const productId = req.params.product_id;
-    Product.findById(productId)
-        .then(foundProduct => {
-            if (!foundProduct) return res.status(400).json({ error: 'No product found with this id.' });
-            res.status(200).json(foundProduct);
-        })
-        .catch((err => res.status(400).json({ error: err.message })));
-
-};
-
 // get user profile
 
 const getProfile = (req, res, next) => {
@@ -207,21 +182,94 @@ const changePassword = (req, res, next) => {
 
     if (oldPassword == '' || newPassword == '') return res.status(400).json('Fields are empty.');
 
+    res.json({ message: 'change password remaining' });
+
 
 
 
 }
 
-
 module.exports = {
     userRegister,
     userLogin,
-    getAllProducts,
-    getSingleProduct,
+    // getAllProducts,
+    // getSingleProduct,
     getProfile,
     updateProfile,
     getPasswordExpiry,
     deleteAccount,
     changePassword,
+    // addReview
 
 }
+
+
+// const changePassword = (req, res, next) => {
+
+//     // note: old password cannot be set as new password
+//     // note: store new hash passowrd in the passwordHistory array
+
+//     const { oldPassword, newPassword } = req.body;
+
+//     if (oldPassword == '' || newPassword == '') return res.status(400).json('Fields are empty.');
+
+
+
+//     // store hash new password in this variable and for comparison with other old hashed passwords
+//     let hashedNewPassword = '';
+
+//     User.findById(req.user.id)
+//         .then(user => {
+//             if (!user) return res.status(400).json({ error: 'User is not found' });
+
+//             // check whether old password match or not
+//             bcrypt.compare(oldPassword, user.password, (err, success) => {
+//                 if (err) {
+//                     return res.status(500).json({ error: err.message });
+//                 }
+//                 else {
+//                     if (!success) return res.status(400).json({ error: 'Old password does not match.' });
+//                     // isoldPasswordMatchWitholdPassword = true;
+
+//                     // check whether new password is same as old password or not by looking into passwordHistory array
+//                     console.log(user.passwordHistory);
+//                     user.passwordHistory.forEach(hashedoldPassword => {
+
+//                         bcrypt.compare(newPassword, hashedoldPassword, (err, success) => {
+//                             if (err) {
+//                                 return res.status(500).json({ error: err.message });
+//                             }
+//                             else {
+//                                 // password does not match 
+//                                 if (!success) { // this means old password is not same as new password so hashed the new password and save it in the db
+
+//                                     const saltRound = 10;
+//                                     bcrypt.hash(newPassword, saltRound, (err, newHashedPassword) => {
+//                                         console.log(`New hashed password: ${newHashedPassword}`);
+
+//                                         User.findByIdAndUpdate(req.user.id, { $set: { password: newHashedPassword, passwordHistory: user.passwordHistory.concat(newHashedPassword) } }, { new: true })
+//                                             .then(updatedCredentials => {
+//                                                 res.status(200).json(updatedCredentials);
+//                                             })
+//                                             .catch((err => res.status(400).json({ error: err.message })));
+//                                     });
+
+//                                 }
+//                                 else {
+//                                     return res.status(400).json({ error: 'New password cannot be same as old password.' });
+//                                 }
+
+//                             }
+
+//                         });
+//                     });
+//                 }
+//             });
+
+//         })
+//         .catch((err => res.status(500).json({ error: err.message })));
+
+
+
+
+// }
