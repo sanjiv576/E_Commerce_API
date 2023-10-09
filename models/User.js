@@ -35,7 +35,9 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
-    
+
+    passwordHistory: [],
+
 
 }, { timestamps: true });
 
