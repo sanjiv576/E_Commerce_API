@@ -7,6 +7,7 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 const user_routes = require('./routes/user_routes');
 const admin_routes = require('./routes/admin_routes');
+const product_routes = require('./routes/product_routes');
 
 const {verifyAdmin, verifyUser} = require('./middlewares/auth');
 
@@ -53,6 +54,9 @@ app.use('/users', user_routes);
 
 // routes for admin
 app.use('/admin', verifyUser, admin_routes);
+
+// routes for products
+app.use('/products', product_routes);
 
 // error handling middlewares
 app.use((req, res, next, err) => {
