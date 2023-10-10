@@ -39,11 +39,21 @@ const productSchema = new mongoose.Schema({
                 required: true,
 
             },
+
             text: {
                 type: String,
                 required: true,
                 maxlength: [50, 'Length of review greater be smaller than 50']
 
+            },
+
+            userName: {
+                type: String,
+                required: true,
+            },
+            userPicture: {
+                type: String,
+                required: true,
             }
         }
     ],
