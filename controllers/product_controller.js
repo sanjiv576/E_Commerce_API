@@ -26,11 +26,45 @@ const getSingleProduct = (req, res, next) => {
 
 
 
+
 // registered users can add reviews to the products
 
 const addReview = (req, res, next) => {
-    // res.json({message: 'add review'});
-    res.status(200).json({ message: 'add review' });
+
+    const productId = req.params.product_id;
+    const { text } = req.body;
+
+    if (text === '') return res.status(400).json({ error: 'Review text cannot be empty.' });
+
+    Product.findByIdAndUpdate(productId,
+        {
+            $push: { reviews: { userId: req.user.id, text, userName: req.user.fullName, userPicture: req.user.picture } }
+        },
+        { new: true }
+    )
+        .then(updatedProduct => {
+            if (!updatedProduct) return res.status(400).json({ error: 'No product found with this id.' });
+            res.status(201).json(updatedProduct);
+        })
+        .catch((err => res.status(400).json({ error: err.message })));
+
+};
+
+// const get all reviews by all users
+
+const getAllReviews = async (req, res, next) => {
+    const productId = req.params.product_id;
+
+    try {
+        const foundProduct = await Product.findById(productId);
+        if (!foundProduct) return res.status(400).json({ error: 'No product found with this id.' });
+        const reviews = foundProduct.reviews;
+        res.status(200).json(reviews);
+    }
+    catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+
 };
 
 
@@ -39,5 +73,6 @@ module.exports = {
     getAllProducts,
     getSingleProduct,
     addReview,
+    getAllReviews,
 }
 
