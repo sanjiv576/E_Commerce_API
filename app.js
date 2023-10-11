@@ -8,8 +8,9 @@ const mongoose = require('mongoose');
 const user_routes = require('./routes/user_routes');
 const admin_routes = require('./routes/admin_routes');
 const product_routes = require('./routes/product_routes');
+const productController = require('./controllers/product_controller');
 
-const {verifyAdmin, verifyUser} = require('./middlewares/auth');
+const { verifyAdmin, verifyUser } = require('./middlewares/auth');
 
 const app = express();
 // middleware to access files
@@ -29,7 +30,7 @@ const localDbUri = `mongodb://127.0.0.1:27017/${dbName}`;  // uri for storing da
 
 
 // for storing data locally
-function connectDbLocally(){
+function connectDbLocally() {
     mongoose.connect(localDbUri)
         .then(console.log(`Database is connected as ${dbName} locally.`))
         .catch((err) => console.log(`Failed to connect database. Error message: ${err}`));
@@ -57,6 +58,12 @@ app.use('/admin', verifyUser, admin_routes);
 
 // routes for products
 app.use('/products', product_routes);
+
+
+app.get('/:product_id/:review_id', productController.getSingleReview);
+app.put('/:product_id/:review_id', verifyUser, productController.updateSingleReview);
+app.delete('/:product_id/:review_id', verifyUser, productController.deleteSingleReview);
+
 
 // error handling middlewares
 app.use((req, res, next, err) => {
