@@ -5,9 +5,6 @@ const { verifyUser } = require('../middlewares/auth');
 const router = express.Router();
 
 
-
-
-
 // get products by admin + registered users + guests
 router.route('/')
     .post((req, res, next) => res.status(405).json({ error: "POST method is not allowed" }))
@@ -29,19 +26,6 @@ router.route('/reviews/:product_id')
     .put((req, res, next) => res.status(405).json({ error: "PUT method is not allowed" }))
     .get(productController.getAllReviews)
     .post(verifyUser, productController.addReview); // only for registered users
-
-// reviews for only registered users
-router.route('/review/:review_id')
-    .delete((req, res, next) => res.status(405).json({ error: "DELETE method is not allowed" }))
-    .put((req, res, next) => res.status(405).json({ error: "PUT method is not allowed" }))
-    .post((req, res, next) => res.status(405).json({ error: "POST method is not allowed" }))
-    .get(productController.getAllReviews)
-
-
-
-// router.get('/reviews', productController.getAllReviews);
-// router.post('/reviews/:product_id', verifyUser, productController.addReview);
-
 
 
 module.exports = router;
