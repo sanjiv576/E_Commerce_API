@@ -1,4 +1,5 @@
 const Product = require("../models/Product");
+const Purchase = require("../models/Purchase");
 
 // get all products by all admin + registered users + guests
 const getAllProducts = (req, res, next) => {
@@ -145,6 +146,72 @@ const deleteSingleReview = async (req, res, next) => {
     }
 };
 
+// purchase a product by registered users
+
+const purchaseProduct = (req, res, next) => {
+
+    try {
+
+
+        const purchaseProductItem = req.body.items;
+        let totalBillAmount = 0;
+
+        purchaseProductItem.forEach(item => {
+            totalBillAmount += item.price * item.quantity;
+        });
+
+        const purchase = {
+            'userId': req.user.id,
+            'userName': req.user.fullName,
+            'userPicture': req.user.picture,
+            'items': req.body.items,
+            'totalPrice': totalBillAmount,
+            'payment': req.body.payment,
+            'purchaseDate': new Date().toISOString().slice(0, 10),
+
+        };
+
+        const savedData = Purchase.create(purchase);
+        if (!savedData) return res.status(400).json({ error: 'Something went wrong. Please try again later.' });
+        res.status(201).json(purchase);
+
+    }
+    catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+
+
+// get all purchases by registered users
+const getAllPurchasesProduct = async (req, res, next) => {
+
+    try {
+        const foundPurchases = await Purchase.find({ userId: req.user.id });
+        if (!foundPurchases) return res.status(400).json({ error: 'No purchases found.' });
+
+        const allPurchaseItems = [];
+
+        foundPurchases.forEach(purchase => {
+            purchase.items.forEach(item => {
+                const singlePurchaseItem = {
+                    'name': item.name,
+                    'price': item.price,
+                    'quantity': item.quantity,
+                    'totalPrice': item.price * item.quantity,
+                    'purchaseDate': purchase.purchaseDate,
+                }
+
+                allPurchaseItems.push(singlePurchaseItem);
+            });
+        });
+
+        res.status(200).json(allPurchaseItems);
+    }
+    catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+
 
 module.exports = {
 
@@ -155,5 +222,7 @@ module.exports = {
     getSingleReview,
     updateSingleReview,
     deleteSingleReview,
+    purchaseProduct,
+    getAllPurchasesProduct,
 }
 
