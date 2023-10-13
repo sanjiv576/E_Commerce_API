@@ -38,6 +38,13 @@ const userSchema = new mongoose.Schema({
 
     passwordHistory: [],
 
+    // Note: STATUS is disable when the users enter the wrong password for more than 3 times
+    //  , otherwise, it is active
+    status: {
+        type: String,
+        enum: ['active', 'disable'],
+        default: 'active'
+    },
 
 }, { timestamps: true });
 
