@@ -64,6 +64,10 @@ app.get('/:product_id/:review_id', productController.getSingleReview);
 app.put('/:product_id/:review_id', verifyUser, productController.updateSingleReview);
 app.delete('/:product_id/:review_id', verifyUser, productController.deleteSingleReview);
 
+app.post('/purchase', verifyUser, productController.purchaseProduct);
+app.get('/purchase', verifyUser, productController.getAllPurchasesProduct);
+
+
 
 // error handling middlewares
 app.use((req, res, next, err) => {
