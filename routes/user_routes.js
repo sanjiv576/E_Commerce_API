@@ -27,7 +27,7 @@ router.route('/lockAccount')
     .get((req, res, next) => res.status(405).json({ error: "GET method is not allowed" }))
     .delete((req, res, next) => res.status(405).json({ error: "DELETE method is not allowed" }))
     .put((req, res, next) => res.status(405).json({ error: "PUT method is not allowed" }))
-    .post(verifyUser, userController.userAccountLock);
+    .post(userController.userAccountLock);
 
 // get,update and delete profile/account
 router.route('/')
