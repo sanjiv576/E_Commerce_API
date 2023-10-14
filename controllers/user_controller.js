@@ -60,6 +60,8 @@ const userLogin = ('/login', (req, res, next) => {
                     // password does not match 
                     if (!success) return res.status(400).json({ error: 'Account has not been registered.' });
 
+                    // check whether account is locked or not
+                    if (user.status == 'disable') return res.status(400).json({ error: 'Account has been locked.' });
                     const payload = {
                         id: user.id,
                         email: user.email,
@@ -97,6 +99,16 @@ const userLogin = ('/login', (req, res, next) => {
 
 });
 
+// lock account after 3 failed login attempts
+const userAccountLock = (req, res, next) => {
+
+    User.findByIdAndUpdate(req.user.id, { $set: { status: "disable" } }, { new: true })
+        .then(updatedUserDetail => {
+            res.status(200).json(updatedUserDetail);
+        })
+        .catch((err => res.status(400).json({ error: err.message })));
+
+};
 
 // get user profile
 
@@ -192,14 +204,12 @@ const changePassword = (req, res, next) => {
 module.exports = {
     userRegister,
     userLogin,
-    // getAllProducts,
-    // getSingleProduct,
+    userAccountLock,
     getProfile,
     updateProfile,
     getPasswordExpiry,
     deleteAccount,
     changePassword,
-    // addReview
 
 }
 
@@ -240,7 +250,7 @@ module.exports = {
 //                                 return res.status(500).json({ error: err.message });
 //                             }
 //                             else {
-//                                 // password does not match 
+//                                 // password does not match
 //                                 if (!success) { // this means old password is not same as new password so hashed the new password and save it in the db
 
 //                                     const saltRound = 10;
