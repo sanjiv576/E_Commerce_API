@@ -36,10 +36,22 @@ const deleteSingleProduct = (req, res, next) => {
 
 };
 
+// unlock the account of registered users
+const userAccountUnlock = (req, res, next) => {
+    const userId = req.params.user_id;
+    User.findByIdAndUpdate(userId, { $set: { status: "active" } }, { new: true })
+        .then(updatedUserDetail => {
+            res.status(200).json(updatedUserDetail);
+        })
+        .catch((err => res.status(400).json({ error: err.message })));
+
+};
+
 
 
 module.exports = {
     addProduct,
     updateProduct,
     deleteSingleProduct,
+    userAccountUnlock,
 }

@@ -18,6 +18,13 @@ router.route('/product/:product_id')
     .delete(verifyAdmin, adminController.deleteSingleProduct)
     .put(verifyAdmin, adminController.updateProduct);
 
+// for unlocking registered user account
+router.route('/unlockAccount/:user_id')
+    .get((req, res, next) => res.status(405).json({ error: "GET method is not allowed" }))
+    .put((req, res, next) => res.status(405).json({ error: 'PUT method is not allowed' }))
+    .delete(verifyAdmin, adminController.deleteSingleProduct)
+    .post(verifyAdmin, adminController.userAccountUnlock);
+
 
 
 
