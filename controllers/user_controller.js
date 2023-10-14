@@ -101,12 +101,22 @@ const userLogin = ('/login', (req, res, next) => {
 
 // lock account after 3 failed login attempts
 const userAccountLock = (req, res, next) => {
+    const { email } = req.body;
 
-    User.findByIdAndUpdate(req.user.id, { $set: { status: "disable" } }, { new: true })
-        .then(updatedUserDetail => {
-            res.status(200).json(updatedUserDetail);
+    if (email == '') return res.status(400).json({ error: 'Email is empty.' });
+
+    User.findOne({ email: email })
+        .then(user => {
+            if (!user) return res.status(400).json({ error: 'Account has not been registered.' });
+
+            user.status = 'disable';
+            user.save()
+                .then(updatedUserStatus => {
+                    res.json(updatedUserStatus);
+                })
+                .catch((err => res.status(500).json({ error: err.message })));
         })
-        .catch((err => res.status(400).json({ error: err.message })));
+        .catch((err => res.status(500).json({ error: err.message })));
 
 };
 
