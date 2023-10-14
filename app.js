@@ -9,6 +9,7 @@ const user_routes = require('./routes/user_routes');
 const admin_routes = require('./routes/admin_routes');
 const product_routes = require('./routes/product_routes');
 const productController = require('./controllers/product_controller');
+const upload_profile_routes = require('./routes/upload_profile_routes');
 
 const { verifyAdmin, verifyUser } = require('./middlewares/auth');
 
@@ -68,6 +69,8 @@ app.post('/purchase', verifyUser, productController.purchaseProduct);
 app.get('/purchase', verifyUser, productController.getAllPurchasesProduct);
 
 
+// for uploading images
+app.use('/uploads', verifyUser, upload_profile_routes);
 
 // error handling middlewares
 app.use((req, res, next, err) => {
