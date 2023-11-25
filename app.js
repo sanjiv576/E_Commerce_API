@@ -37,13 +37,13 @@ function connectDbLocally() {
         .catch((err) => console.log(`Failed to connect database. Error message: ${err}`));
 }
 
-// connectDbLocally();
+connectDbLocally();
 
 
 // mongodb globally connection
-mongoose.connect(globalDbUri)
-    .then(() => console.log(`Database is connected successfully globally to ${globalDbUri}.`))
-    .catch((err) => console.log(`Failied to connect database. Error message : ${err.message}`));
+// mongoose.connect(globalDbUri)
+//     .then(() => console.log(`Database is connected successfully globally to ${globalDbUri}.`))
+//     .catch((err) => console.log(`Failied to connect database. Error message : ${err.message}`));
 
 // testing 
 app.get('/', (req, res) => {
