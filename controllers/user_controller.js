@@ -144,10 +144,9 @@ const getProfile = (req, res, next) => {
 // allow to update full name becasue picture will be updated by separate end point
 
 const updateProfile = (req, res, next) => {
-
+    if (req.body.fullName == '') return res.status(400).json('Failed to update profile.');
     User.findByIdAndUpdate(req.user.id, { $set: { fullName: req.body.fullName } }, { new: true })
         .then(updatedProduct => {
-            if (req.body.fullName == '') return res.status(400).json('Failed to update profile.');
             res.status(200).json(updatedProduct);
         })
         .catch((err => res.status(400).json({ error: err.message })));
