@@ -192,6 +192,68 @@ const deleteAccount = (req, res, next) => {
         .catch((err => res.status(500).json({ error: err.message })));
 }
 
+
+
+// replace old password by new password after validation --> Step 3
+function changePasswordFromValidAccount(newPassword, User, user, res, req) {
+    // replace password
+    const saltRound = 10;
+    bcrypt.hash(newPassword, saltRound, (err, newHashedPassword) => {
+
+        if (!err) {
+            console.log(`New hashed password: ${newHashedPassword}`);
+
+            User.findByIdAndUpdate(req.user.id, { $set: { password: newHashedPassword, passwordHistory: user.passwordHistory.concat(newHashedPassword) } }, { new: true })
+                .then(updatedCredentials => {
+                    res.status(200).json(updatedCredentials);
+                })
+                .catch((err => res.status(400).json({ error: err.message })));
+        }
+        else {
+            return res.status(500).json({ error: err.message });
+        }
+
+
+    });
+}
+
+async function isPasswordMatchWithOldPassword(newPassword, oldHashedPassword) {
+    const match = await bcrypt.compare(newPassword, oldHashedPassword);
+    if (match) {
+        return true;
+    }
+    return false;
+}
+
+// check new password matches with old password or not => boolean  -- Step 2
+
+async function passwordMatches(user, newPassword) {
+    // assume new password matches with new password
+    let counter = 0;
+
+    try {
+        for (let hashedoldPassword of user.passwordHistory) {
+            const match = await bcrypt.compare(newPassword, hashedoldPassword);
+            if (match) {
+                counter++;
+
+                console.log(`Password match counter : ${counter}`)
+                return true;
+
+            }
+        }
+        console.log('Password does not match');
+        return false;
+
+    }
+    catch (error) {
+        console.error('Error comparing passwords:', error);
+        return false;
+    }
+
+
+}
+
 // allow to change password and set brand new not old one, needs 2 field i.e. old password and new password
 
 const changePassword = (req, res, next) => {
@@ -203,11 +265,35 @@ const changePassword = (req, res, next) => {
 
     if (oldPassword == '' || newPassword == '') return res.status(400).json('Fields are empty.');
 
-    res.json({ message: 'change password remaining' });
 
+    User.findById(req.user.id)
+        .then(user => {
+            if (!user) return res.status(400).json({ error: 'User is not found' });
 
+            // check new password matched with old password
+            bcrypt.compare(oldPassword, user.password, async (err, success) => {
+                if (err) {
+                    return res.status(500).json({ error: err.message });
+                }
+                if (success) {
+                    // check whether old password match or not // false = new password does not match with old passwords
+                    const result = await passwordMatches(user, newPassword);
+                    console.log(`is new password match with old password ? Resul value : ${result}`);
 
+                    if (!result) {
+                        changePasswordFromValidAccount(newPassword, User, user, res, req);
+                    }
+                    else {
+                        return res.status(400).json({ error: 'New password cannot be same as old password. Or something went wrong.' });
+                    }
+                }
+                else {
+                    return res.status(400).json({ error: 'Old password does not match.' });
 
+                }
+            });
+        })
+        .catch((err => res.status(500).json({ error: err.message })));
 }
 
 module.exports = {
@@ -221,74 +307,3 @@ module.exports = {
     changePassword,
 
 }
-
-
-// const changePassword = (req, res, next) => {
-
-//     // note: old password cannot be set as new password
-//     // note: store new hash passowrd in the passwordHistory array
-
-//     const { oldPassword, newPassword } = req.body;
-
-//     if (oldPassword == '' || newPassword == '') return res.status(400).json('Fields are empty.');
-
-
-
-//     // store hash new password in this variable and for comparison with other old hashed passwords
-//     let hashedNewPassword = '';
-
-//     User.findById(req.user.id)
-//         .then(user => {
-//             if (!user) return res.status(400).json({ error: 'User is not found' });
-
-//             // check whether old password match or not
-//             bcrypt.compare(oldPassword, user.password, (err, success) => {
-//                 if (err) {
-//                     return res.status(500).json({ error: err.message });
-//                 }
-//                 else {
-//                     if (!success) return res.status(400).json({ error: 'Old password does not match.' });
-//                     // isoldPasswordMatchWitholdPassword = true;
-
-//                     // check whether new password is same as old password or not by looking into passwordHistory array
-//                     console.log(user.passwordHistory);
-//                     user.passwordHistory.forEach(hashedoldPassword => {
-
-//                         bcrypt.compare(newPassword, hashedoldPassword, (err, success) => {
-//                             if (err) {
-//                                 return res.status(500).json({ error: err.message });
-//                             }
-//                             else {
-//                                 // password does not match
-//                                 if (!success) { // this means old password is not same as new password so hashed the new password and save it in the db
-
-//                                     const saltRound = 10;
-//                                     bcrypt.hash(newPassword, saltRound, (err, newHashedPassword) => {
-//                                         console.log(`New hashed password: ${newHashedPassword}`);
-
-//                                         User.findByIdAndUpdate(req.user.id, { $set: { password: newHashedPassword, passwordHistory: user.passwordHistory.concat(newHashedPassword) } }, { new: true })
-//                                             .then(updatedCredentials => {
-//                                                 res.status(200).json(updatedCredentials);
-//                                             })
-//                                             .catch((err => res.status(400).json({ error: err.message })));
-//                                     });
-
-//                                 }
-//                                 else {
-//                                     return res.status(400).json({ error: 'New password cannot be same as old password.' });
-//                                 }
-
-//                             }
-
-//                         });
-//                     });
-//                 }
-//             });
-
-//         })
-//         .catch((err => res.status(500).json({ error: err.message })));
-
-
-
-
-// }
