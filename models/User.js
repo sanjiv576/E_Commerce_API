@@ -70,9 +70,19 @@ const isPasswordChangeRequired = function (lastPasswordChangedDate) {
     return today > expirationDate;
 };
 
+// password guidelines => must be 8 < x < 12, 1 upper case, 1 lowercase, 1 number , 1 special character
 
+const validatePassword = (password) => {
+    const isLengthValid = password.length >= 8 && password.length <= 12;
+    const isUppercaseValid = /[A-Z]/.test(password);
+    const isLowercaseValid = /[a-z]/.test(password);
+    const isNumberValid = /\d/.test(password);
+    const isSpecialCharValid = /[!@#$%^&*()_+[\]{};':"<>?~]/.test(password);
+
+    return isLengthValid && isUppercaseValid && isLowercaseValid && isNumberValid && isSpecialCharValid ? true : false;
+};
 
 
 const User = new mongoose.model('User', userSchema);
 
-module.exports = { User, userSchema, isPasswordChangeRequired };
+module.exports = { User, userSchema, isPasswordChangeRequired, validatePassword };
