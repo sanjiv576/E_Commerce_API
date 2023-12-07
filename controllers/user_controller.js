@@ -1,4 +1,4 @@
-const { User, isPasswordChangeRequired } = require("../models/User");
+const { User, isPasswordChangeRequired, validatePassword } = require("../models/User");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -203,7 +203,14 @@ function changePasswordFromValidAccount(newPassword, User, user, res, req) {
         if (!err) {
             console.log(`New hashed password: ${newHashedPassword}`);
 
-            User.findByIdAndUpdate(req.user.id, { $set: { password: newHashedPassword, passwordHistory: user.passwordHistory.concat(newHashedPassword) } }, { new: true })
+            User.findByIdAndUpdate(req.user.id,
+                {
+                    $set: {
+                        password: newHashedPassword,
+                        passwordHistory: user.passwordHistory.concat(newHashedPassword),
+                        passwordLastChanged: Date.now()
+                    }
+                }, { new: true })
                 .then(updatedCredentials => {
                     res.status(200).json(updatedCredentials);
                 })
@@ -217,13 +224,7 @@ function changePasswordFromValidAccount(newPassword, User, user, res, req) {
     });
 }
 
-async function isPasswordMatchWithOldPassword(newPassword, oldHashedPassword) {
-    const match = await bcrypt.compare(newPassword, oldHashedPassword);
-    if (match) {
-        return true;
-    }
-    return false;
-}
+
 
 // check new password matches with old password or not => boolean  -- Step 2
 
@@ -265,6 +266,9 @@ const changePassword = (req, res, next) => {
 
     if (oldPassword == '' || newPassword == '') return res.status(400).json('Fields are empty.');
 
+    if (!validatePassword(newPassword)) {
+        return res.status(400).json({ error: 'Password does not follow guidelines.' });
+    }
 
     User.findById(req.user.id)
         .then(user => {
